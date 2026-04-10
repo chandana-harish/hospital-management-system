@@ -25,20 +25,14 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Check Quality Gate
-        id: qualitygate
-        uses: SonarSource/sonarqube-quality-gate-action@v1
-        continue-on-error: true
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Custom Failure Message
+      - name: Show Custom Message
+        if: always()
         run: |
+          echo "Quality Gate Result: ${{ steps.qualitygate.outcome }}"
+
           if [ "${{ steps.qualitygate.outcome }}" != "success" ]; then
-            echo "::error::❌ SonarQube Quality Gate Failed!"
-            echo "🚫 Fix bugs, vulnerabilities, and code smells before merging."
+            echo "::error title=SonarQube Failed::❌ Quality Gate Failed! Fix issues before merging."
             exit 1
           else
-            echo "✅ Quality Gate Passed!"
+            echo "::notice title=SonarQube Passed::✅ Code quality is good."
           fi
