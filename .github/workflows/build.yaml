@@ -25,3 +25,11 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Custom Failure Message
+        if: failure()
+        run: echo "::error::❌ SonarQube Quality Gate Failed! Fix issues before proceeding."
