@@ -51,4 +51,11 @@ jobs:
           body: "Quality Gate failed. Check SonarQube."
           to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Actions
+      - name: Snyk Initialize Backend
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --file=backend/package.json
  
