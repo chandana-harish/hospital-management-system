@@ -1,16 +1,16 @@
 name: Build
-
+ 
 on:
   push:
-    branches: [ master ]
-
-
+    branches:
+      - master
+ 
+ 
 jobs:
-  ci:
+  build:
     name: Build and analyze
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    
+   
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,30 +21,34 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       # If you wish to fail your job when the Quality Gate is red, uncomment the
       # following lines. This would typically be used to fail a deployment.
-      # - uses: SonarSource/sonarqube-quality-gate-action@v1
+      # - name: Quality Gate Check
+      #   uses: SonarSource/sonarqube-quality-gate-action@v1
+      #   id: qualitygate
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Send Email
-        if: failure() && github.event_name == 'push'
+      - name: Send Success Email
+        if: success()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          to: ${{ secrets.EMAIL_TO }}
-          subject: "❌ SonarQube Pipeline Failed"
-          body: |
-            Your pipeline has failed!
-
-            Reason: SonarQube Quality Gate Failed ❌
-            
-            Please fix:
-            - Bugs
-            - Vulnerabilities
-            - Code Smells
-
-            Then push again.
-          to: ${{ secrets.EMAIL_TO }}
+          subject: "Build Passed"
+          body: "No vulnerabilities found."
+          to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Actions
+      - name: Send Failure Email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Build Failed"
+          body: "Quality Gate failed. Check SonarQube."
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: GitHub Actions
+ 
