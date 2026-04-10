@@ -2,13 +2,13 @@ name: Build
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
 
 
 jobs:
-  build:
+  ci:
     name: Build and analyze
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     
     steps:
