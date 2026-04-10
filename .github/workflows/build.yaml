@@ -25,14 +25,27 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Show Custom Message
-        if: always()
-        run: |
-          echo "Quality Gate Result: ${{ steps.qualitygate.outcome }}"
+      - name: Send Email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          to: ${{ secrets.EMAIL_TO }}
+          from: ${{ secrets.EMAIL_USERNAME }}
+          subject: "❌ SonarQube Pipeline Failed"
+          body: |
+            Your pipeline has failed!
 
-          if [ "${{ steps.qualitygate.outcome }}" != "success" ]; then
-            echo "::error title=SonarQube Failed::❌ Quality Gate Failed! Fix issues before merging."
-            exit 1
-          else
-            echo "::notice title=SonarQube Passed::✅ Code quality is good."
-          fi
+            Reason: SonarQube Quality Gate Failed ❌
+            
+            Please fix:
+            - Bugs
+            - Vulnerabilities
+            - Code Smells
+
+            Then push again.
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Actions
